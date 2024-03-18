@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>sep_micro</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="copy-icon.jpg" />
+    <None Remove="copy-icon_active.jpg" />
+    <None Remove="password_reveal-active.png" />
+    <None Remove="password_reveal-default.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="copy-icon.jpg" />
+    <Resource Include="copy-icon_active.jpg" />
+    <Resource Include="password_reveal-active.png" />
+    <Resource Include="password_reveal-default.png" />
+  </ItemGroup>
+
+</Project>
