@@ -124,6 +124,11 @@ namespace sep_micro
                         AES.EncryptFile(file, file + ".aes", pwSecretKey.Password);
                     }
                     MessageBox.Show($"{selectedFilePaths.Length} files encrypted.", "SEP");
+                    pwSecretKey.IsEnabled = true;
+                    pwSecretKey.Password = "";
+                    selectedFileNames = null;
+                    selectedFilePaths = null;
+                    lbFileDisplayPreview.Content = "";
                 }
                 else
                 {
@@ -132,6 +137,11 @@ namespace sep_micro
                         AES.DecryptFile(file, file.Substring(0, file.Length - 4), pwSecretKey.Password);
                     }
                     MessageBox.Show($"{selectedFilePaths.Length} files decrypted.", "SEP");
+                    pwSecretKey.IsEnabled = true;
+                    pwSecretKey.Password = "";
+                    selectedFileNames = null;
+                    selectedFilePaths = null;
+                    lbFileDisplayPreview.Content = "";
                 }
             }
         }
