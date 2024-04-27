@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,11 +12,12 @@ namespace sep_micro
 {
     class AES
     {
-        //  Call this function to remove the key from memory after use for security
+        //  This removes the key from memory after it's use for security
         [DllImport("KERNEL32.DLL", EntryPoint = "RtlZeroMemory")]
         public static extern bool ZeroMemory(IntPtr Destination, int Length);
 
-        // Creates a random salt that will be used to encrypt your file. This method is required on FileEncrypt.
+        // Creates a random piece of data called a 'salt', which is combined
+        // with your password that will be used to encrypt your file.
         public static byte[] GenerateRandomSalt()
         {
             byte[] data = new byte[32];
@@ -34,39 +35,39 @@ namespace sep_micro
 
         public static void EncryptFile(string inputFile, string outputFile, string password)
         {
-            //Source: http://stackoverflow.com/questions/27645527/aes-encryption-on-large-files
+            //Source: http://stackoverflow.com/questions/27645527/aes-encryption-on-large-files.
 
-            //This generates a random salt
+            //This generates a random salt.
             byte[] salt = GenerateRandomSalt();
 
-            //This gets the name for the encrypted file
+            //This gets the name for the encrypted file.
             FileStream fsCrypt = new FileStream(outputFile, FileMode.Create);
 
-            //Changed the password into a format that can be used by this method
+            //Change the password into a format that can be used by this method.
             byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
 
-            //Setup the Aes symmetric encryption algorithm
+            //Setup the Aes symmetric encryption algorithm.
             Aes AES = Aes.Create();
             AES.KeySize = 256;
             AES.BlockSize = 128;
             AES.Padding = PaddingMode.PKCS7;
 
-            //"What it does is repeatedly hash the user password along with the salt." High iteration counts.
+            //This repeatedly hashes the password along with the salt.
             var key = new Rfc2898DeriveBytes(passwordBytes, salt, 50000, HashAlgorithmName.SHA256);
             AES.Key = key.GetBytes(AES.KeySize / 8);
             AES.IV = key.GetBytes(AES.BlockSize / 8);
 
-            //Cipher modes: http://security.stackexchange.com/questions/52665/which-is-the-best-cipher-mode-and-padding-mode-for-aes-encryption
+            //Cipher modes: http://security.stackexchange.com/questions/52665/which-is-the-best-cipher-mode-and-padding-mode-for-aes-encryption.
             AES.Mode = CipherMode.CFB;
 
-            // write salt to the begining of the output file, so in this case can be random every time
+            //Add the salt to the begining of the output file.
             fsCrypt.Write(salt, 0, salt.Length);
 
             CryptoStream cs = new CryptoStream(fsCrypt, AES.CreateEncryptor(), CryptoStreamMode.Write);
 
             FileStream fsIn = new FileStream(inputFile, FileMode.Open);
 
-            //create a buffer (1mb) so only this amount will allocate in the memory and not the whole file
+            //Creates a buffer (1mb) so only this amount will be allocated in the memory and not the whole file.
             byte[] buffer = new byte[1048576];
             int read;
 
