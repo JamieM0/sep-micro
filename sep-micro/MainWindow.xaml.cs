@@ -1,6 +1,9 @@
 ﻿using Microsoft.Win32;
+using System.Text;
+using System;
 using System.Windows;
 using System.Windows.Input;
+using System.IO;
 
 namespace sep_micro
 {
@@ -10,13 +13,15 @@ namespace sep_micro
     public partial class MainWindow : Window
     {
         bool encryptMode = true;
+        string[] selectedFilePaths;
+        string[] selectedFileNames;
+        bool usingKeyfile = false;
+        string keyfilePath = "";
+
         public MainWindow()
         {
             InitializeComponent();
         }
-
-        string[] selectedFilePaths;
-        string[] selectedFileNames;
         private void btnSelectFiles_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -78,26 +83,33 @@ namespace sep_micro
             {
                 btnFunction.Content = "Encrypt File";
             }
+
+            ConditionChecker();
         }
 
         private void btnFunction_Click(object sender, RoutedEventArgs e)
         {
-            if (pwSecretKey.Password == null || pwSecretKey.Password == "")
-            {
-                MessageBox.Show("You must enter a password.");
-            }
-            else if (selectedFilePaths == null || selectedFilePaths.Length < 1)
+            if (selectedFilePaths == null || selectedFilePaths.Length < 1)
             {
                 MessageBox.Show("You must select at least 1 file to encrypt or decrypt.");
+            }
+            else if ((pwSecretKey.Password == null || pwSecretKey.Password == "") && !usingKeyfile)
+            {
+                MessageBox.Show("You must enter a password or use a keyfile.");
             }
             else
             {
                 pwSecretKey.IsEnabled = false;
+                string password = pwSecretKey.Password;
+                if (usingKeyfile)
+                {
+                    password += OtherOperations.CalculateSHA256(keyfilePath);
+                }
                 if (encryptMode)
                 {
                     foreach (string file in selectedFilePaths)
                     {
-                        AES.EncryptFile(file, file + ".aes", pwSecretKey.Password);
+                        AES.EncryptFile(file, file + ".aes", password);
                     }
                     MessageBox.Show($"{selectedFilePaths.Length} files encrypted.", "SEP");
                 }
@@ -105,7 +117,7 @@ namespace sep_micro
                 {
                     foreach (string file in selectedFilePaths)
                     {
-                        AES.DecryptFile(file, file.Substring(0, file.Length - 4), pwSecretKey.Password);
+                        AES.DecryptFile(file, file.Substring(0, file.Length - 4), password);
                     }
                     MessageBox.Show($"{selectedFilePaths.Length} files decrypted.", "SEP");
                 }
@@ -121,6 +133,9 @@ namespace sep_micro
                 lbFileDisplayPreview.Content = "Drag and drop files here";
                 selectedFileNames = null;
                 selectedFilePaths = null;
+                usingKeyfile = false;
+                lbKeyfile.Content = "No keyfile selected.";
+                keyfilePath = "";
             }
         }
 
@@ -132,14 +147,29 @@ namespace sep_micro
             btnFunction.Content = "Ready";
         }
 
+        private void ConditionChecker()
+        {
+            try
+            {
+                if (selectedFilePaths.Length > 1)
+                {
+                    cbCombineFiles.IsEnabled = true;
+                }
+                else
+                {
+                    cbCombineFiles.IsChecked = false;
+                    cbCombineFiles.IsEnabled = false;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
         private void btnShowPassword_Click(object sender, RoutedEventArgs e)
         {
 
-        }
-
-        private void btnCopy_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(pwSecretKey.Password);
         }
 
         private void ShowPasswordFunction()
@@ -209,6 +239,91 @@ namespace sep_micro
             }
 
             FileHandler();
+        }
+
+        private void cbCombineFiles_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        Random rnd = new Random();
+        private void btnGeneratePassword_Click(object sender, RoutedEventArgs e)
+        {
+            //Generate a random password
+            pwSecretKey.Password = GeneratePassword(16);
+        }
+
+        private void btnCopyPassword_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(pwSecretKey.Password);
+        }
+
+        private void SelectKeyfile(string filePath)
+        {
+            lbKeyfile.Content = Path.GetFileName(filePath);
+            usingKeyfile = true;
+            keyfilePath = filePath;
+        }
+
+        private void GenerateKeyfile(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = "Keyfile";
+            saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
+
+            bool? result = saveFileDialog.ShowDialog();
+            if (result == true)
+            {
+                try
+                {
+                    File.WriteAllText(saveFileDialog.FileName, GeneratePassword(128), Encoding.UTF8);
+                    MessageBox.Show("File saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    SelectKeyfile(saveFileDialog.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred while saving the file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void btnShowPassword_MouseDown_1(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void pwVisible_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+
+        }
+
+        private string GeneratePassword(int length)
+        {
+            //Generate a random password
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+=-<?>:{}[]";
+            var stringChars = new char[length];
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = chars[rnd.Next(chars.Length)];
+            }
+
+            return new String(stringChars);
+        }
+
+        private void btnSelectKeyfile_Click(object sender, RoutedEventArgs e)
+        {
+            //Open file dialog
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "All files (*.*)|*.*";
+            openFileDialog.RestoreDirectory = true;
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SelectKeyfile(openFileDialog.FileName);
+            }
         }
     }
 }

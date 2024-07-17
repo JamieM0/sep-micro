@@ -64,5 +64,15 @@ namespace sep_micro
                 MessageBox.Show($"Sorry, these files could not be deleted. Please try again.\r\nMore Details: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public static string CalculateSHA256(string filePath)
+        {
+            using (var stream = File.OpenRead(filePath))
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
     }
 }

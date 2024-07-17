@@ -8,23 +8,26 @@
         Drop="DropZone_Drop" 
         DragEnter="DropZone_DragEnter"
         DragLeave="DropZone_DragLeave"
-        Title="SEP Micro" Height="345" Width="404" MinWidth="280" MinHeight="236" AllowDrop="True">
+        Title="SEP Micro" Height="345" Width="404" MinWidth="404" MinHeight="345" AllowDrop="True">
     <Grid Margin="0,0,0,-1">
         <Button x:Name="btnSelectFiles" Content="..." HorizontalAlignment="Right" Margin="0,9,76,0" VerticalAlignment="Top" Width="52" Click="btnSelectFiles_Click" FontSize="14"/>
-        <Button x:Name="btnCopy" Click="btnCopy_Click" Margin="333,81,47,226" Height="23" Width="24">
-            <Image Source="/Resources/copy-icon.png" Height="20" Width="22"></Image>
-        </Button>
-        <Button x:Name="btnShowPassword" Click="btnShowPassword_Click" Margin="362,81,18,226" MouseDown="btnShowPassword_MouseDown" MouseUp="btnShowPassword_MouseUp" Height="23" Width="24">
-            <Image Source="/Resources/password-reveal-icon.png" Height="20" Width="22"/>
-        </Button>
         <Label x:Name="lbFileDisplayPreview" Content="Drag and drop files here" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="13,4,0,0"/>
-        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Enter Password:" Margin="13,51,0,0"/>
-        <PasswordBox x:Name="pwSecretKey" HorizontalAlignment="Left" Margin="18,81,0,0" VerticalAlignment="Top" Width="310" PasswordChar="*" Height="23"/>
-        <TextBox Name="pwVisible" Visibility="Hidden"/>
+        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Enter Password:" Margin="18,51,0,0"/>
+        <TextBox x:Name="pwVisible" HorizontalAlignment="Center" Margin="0,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="342" TextChanged="pwVisible_TextChanged" Height="23" Visibility="Hidden"/>
+        <PasswordBox x:Name="pwSecretKey" HorizontalAlignment="Center" Margin="0,81,0,0" VerticalAlignment="Top" Width="342" PasswordChar="*" Height="23" FontSize="14"/>
         <Button x:Name="btnFunction" Content="Ready" HorizontalAlignment="Left" Margin="117,249,0,0" VerticalAlignment="Top" Height="32" Width="150" Click="btnFunction_Click"/>
         <Button x:Name="btnClearFiles" Content="Clear" HorizontalAlignment="Right" Margin="0,9,18,0" VerticalAlignment="Top" Width="52" Click="btnClearFiles_Click" FontSize="14"/>
         <Rectangle HorizontalAlignment="Center" Height="1" Margin="0,40,0,0" Stroke="Black" VerticalAlignment="Top" Width="368"/>
-        <CheckBox x:Name="cbDeleteFiles" Content="Delete Files" HorizontalAlignment="Left" Margin="18,163,0,0" VerticalAlignment="Top"/>
-        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Options:" Margin="13,128,0,0"/>
+        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Options:" Margin="18,158,0,0"/>
+        <CheckBox x:Name="cbDeleteFiles" Content="Delete Files" HorizontalAlignment="Left" Margin="18,195,0,0" VerticalAlignment="Top" ToolTip="Securely delete the selected files after encryption." FontSize="14"/>
+        <CheckBox x:Name="cbCombineFiles" Content="Combine Files" HorizontalAlignment="Left" Margin="18,218,0,0" VerticalAlignment="Top" Checked="cbCombineFiles_Checked" ToolTip="Combine selected files into a single .zip file." FontSize="14" Visibility="Hidden"/>
+        <Button x:Name="btnCopyPassword" Content="Copy" HorizontalAlignment="Right" Margin="0,53,133,0" VerticalAlignment="Top" Width="40" Click="btnCopyPassword_Click" Height="23"/>
+        <Button x:Name="btnShowPassword" Content="Show" HorizontalAlignment="Right" Margin="0,53,88,0" VerticalAlignment="Top" Width="40" Click="btnShowPassword_Click" Height="23" MouseDown="btnShowPassword_MouseDown" MouseUp="btnShowPassword_MouseUp"/>
+        <Button x:Name="btnGeneratePassword" Content="Generate" HorizontalAlignment="Right" Margin="0,53,23,0" VerticalAlignment="Top" Width="60" Click="btnGeneratePassword_Click" Height="23"/>
+        <Canvas Margin="0,158,0,98" d:IsHidden="True"/>
+        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Keyfile:" Margin="18,120,0,0"/>
+        <Button x:Name="btnSelectKeyfile" Content="Select Keyfile" HorizontalAlignment="Right" Margin="0,119,23,0" VerticalAlignment="Top" Width="86" Click="btnSelectKeyfile_Click" Height="23"/>
+        <Button x:Name="btnGenerateKeyfile" Content="Generate Keyfile" HorizontalAlignment="Right" Margin="0,119,114,0" VerticalAlignment="Top" Width="95" Click="GenerateKeyfile" Height="23"/>
+        <Label x:Name="lbKeyfile" VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" Content="No keyfile selected." Margin="67,122,0,0"/>
     </Grid>
 </Window>
