@@ -9,25 +9,31 @@
         DragEnter="DropZone_DragEnter"
         DragLeave="DropZone_DragLeave"
         Title="SEP Micro" Height="345" Width="404" MinWidth="404" MinHeight="345" AllowDrop="True">
-    <Grid Margin="0,0,0,-1">
+    <Grid Margin="0,0,0,-6">
         <Button x:Name="btnSelectFiles" Content="..." HorizontalAlignment="Right" Margin="0,9,76,0" VerticalAlignment="Top" Width="52" Click="btnSelectFiles_Click" FontSize="14"/>
         <Label x:Name="lbFileDisplayPreview" Content="Drag and drop files here" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" Margin="13,4,0,0"/>
-        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Enter Password:" Margin="18,51,0,0"/>
-        <TextBox x:Name="pwVisible" HorizontalAlignment="Center" Margin="0,81,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="342" TextChanged="pwVisible_TextChanged" Height="23" Visibility="Hidden"/>
-        <PasswordBox x:Name="pwSecretKey" HorizontalAlignment="Center" Margin="0,81,0,0" VerticalAlignment="Top" Width="342" PasswordChar="*" Height="23" FontSize="14"/>
-        <Button x:Name="btnFunction" Content="Ready" HorizontalAlignment="Left" Margin="117,249,0,0" VerticalAlignment="Top" Height="32" Width="150" Click="btnFunction_Click"/>
         <Button x:Name="btnClearFiles" Content="Clear" HorizontalAlignment="Right" Margin="0,9,18,0" VerticalAlignment="Top" Width="52" Click="btnClearFiles_Click" FontSize="14"/>
-        <Rectangle HorizontalAlignment="Center" Height="1" Margin="0,40,0,0" Stroke="Black" VerticalAlignment="Top" Width="368"/>
-        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Options:" Margin="18,158,0,0"/>
-        <CheckBox x:Name="cbDeleteFiles" Content="Delete Files" HorizontalAlignment="Left" Margin="18,195,0,0" VerticalAlignment="Top" ToolTip="Securely delete the selected files after encryption." FontSize="14"/>
-        <CheckBox x:Name="cbCombineFiles" Content="Combine Files" HorizontalAlignment="Left" Margin="18,218,0,0" VerticalAlignment="Top" Checked="cbCombineFiles_Checked" ToolTip="Combine selected files into a single .zip file." FontSize="14" Visibility="Hidden"/>
-        <Button x:Name="btnCopyPassword" Content="Copy" HorizontalAlignment="Right" Margin="0,53,133,0" VerticalAlignment="Top" Width="40" Click="btnCopyPassword_Click" Height="23"/>
-        <Button x:Name="btnShowPassword" Content="Show" HorizontalAlignment="Right" Margin="0,53,88,0" VerticalAlignment="Top" Width="40" Click="btnShowPassword_Click" Height="23" MouseDown="btnShowPassword_MouseDown" MouseUp="btnShowPassword_MouseUp"/>
-        <Button x:Name="btnGeneratePassword" Content="Generate" HorizontalAlignment="Right" Margin="0,53,23,0" VerticalAlignment="Top" Width="60" Click="btnGeneratePassword_Click" Height="23"/>
-        <Canvas Margin="0,158,0,98" d:IsHidden="True"/>
-        <Label VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Keyfile:" Margin="18,120,0,0"/>
-        <Button x:Name="btnSelectKeyfile" Content="Select Keyfile" HorizontalAlignment="Right" Margin="0,119,23,0" VerticalAlignment="Top" Width="86" Click="btnSelectKeyfile_Click" Height="23"/>
-        <Button x:Name="btnGenerateKeyfile" Content="Generate Keyfile" HorizontalAlignment="Right" Margin="0,119,114,0" VerticalAlignment="Top" Width="95" Click="GenerateKeyfile" Height="23"/>
-        <Label x:Name="lbKeyfile" VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" Content="No keyfile selected." Margin="67,122,0,0"/>
+        <Rectangle x:Name="Divider" HorizontalAlignment="Center" Height="1" Margin="0,40,0,0" Stroke="Black" VerticalAlignment="Top" Width="368"/>
+        <Label x:Name="lbOptions" VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" FontSize="14" Content="Options:" Margin="18,158,0,0"/>
+        <Button x:Name="btnFunction" Content="Ready" HorizontalAlignment="Center" Margin="0,276,0,0" VerticalAlignment="Top" Height="32" Width="150" Click="btnFunction_Click"/>
+        <Canvas x:Name="pnlOptionsEncrypt" Margin="0,188,0,68">
+            <CheckBox x:Name="cbDeleteFiles" Content="Delete Files" ToolTip="Securely delete the selected files after encryption." FontSize="14" HorizontalAlignment="Center" Canvas.Left="18" Canvas.Top="10" VerticalAlignment="Top"/>
+            <CheckBox x:Name="cbCombineFiles" Content="Combine Files" Checked="cbCombineFiles_Checked" ToolTip="Combine selected files into a single .zip file." FontSize="14" HorizontalAlignment="Center" Canvas.Left="18" Canvas.Top="33" VerticalAlignment="Top" Unchecked="cbCombineFiles_Unchecked"/>
+            <CheckBox x:Name="cbRecursiveEncryption" Content="Recursively Encrypt" ToolTip="Encrypt files in the selected folder's subfolder." FontSize="14" Canvas.Left="18" Canvas.Top="56" HorizontalAlignment="Center" VerticalAlignment="Top" Unchecked="cbRecursiveEncryption_Unchecked" Visibility="Hidden"/>
+        </Canvas>
+        <Canvas x:Name="pnlKeyfile" Margin="0,112,0,178">
+            <Label Height="30" FontSize="14" Content="Keyfile:" HorizontalAlignment="Left" Canvas.Left="17" Canvas.Top="10" VerticalAlignment="Center"/>
+            <Button x:Name="btnSelectKeyfile" Content="Select Keyfile" Width="86" Click="btnSelectKeyfile_Click" Height="23" HorizontalAlignment="Left" Canvas.Left="295" Canvas.Top="9" VerticalAlignment="Center"/>
+            <Button x:Name="btnGenerateKeyfile" Content="Generate Keyfile" Width="94" Click="GenerateKeyfile" Height="23" HorizontalAlignment="Left" Canvas.Left="195" Canvas.Top="9" VerticalAlignment="Center"/>
+            <Label x:Name="lbKeyfile" Height="30" Content="No keyfile selected." HorizontalAlignment="Left" Canvas.Left="67" Canvas.Top="12" VerticalAlignment="Center"/>
+        </Canvas>
+        <Canvas x:Name="pnlPassword" Margin="0,48,0,219">
+            <Label Height="30" FontSize="14" Content="Enter Password:" HorizontalAlignment="Left" Canvas.Left="17" Canvas.Top="6" VerticalAlignment="Center"/>
+            <TextBox x:Name="pwVisible" TextWrapping="Wrap" Width="342" TextChanged="pwVisible_TextChanged" Height="23" Visibility="Hidden" HorizontalAlignment="Left" Canvas.Left="30" Canvas.Top="37" VerticalAlignment="Center"/>
+            <PasswordBox x:Name="pwSecretKey" Width="342" PasswordChar="*" Height="23" FontSize="14" HorizontalAlignment="Left" Canvas.Left="30" Canvas.Top="36" VerticalAlignment="Center"/>
+            <Button x:Name="btnCopyPassword" Content="Copy" Width="40" Click="btnCopyPassword_Click" Height="23" HorizontalAlignment="Left" Canvas.Left="231" Canvas.Top="8" VerticalAlignment="Center"/>
+            <Button x:Name="btnShowPassword" Content="Show" Width="40" Click="btnShowPassword_Click" Height="23" MouseDown="btnShowPassword_MouseDown" MouseUp="btnShowPassword_MouseUp" HorizontalAlignment="Left" Canvas.Left="276" Canvas.Top="8" VerticalAlignment="Center"/>
+            <Button x:Name="btnGeneratePassword" Content="Generate" Width="60" Click="btnGeneratePassword_Click" Height="23" HorizontalAlignment="Left" Canvas.Left="321" Canvas.Top="8" VerticalAlignment="Center"/>
+        </Canvas>
     </Grid>
 </Window>

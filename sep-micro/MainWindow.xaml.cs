@@ -4,6 +4,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.IO;
+using System.IO.Compression;
 
 namespace sep_micro
 {
@@ -17,6 +18,9 @@ namespace sep_micro
         string[] selectedFileNames;
         bool usingKeyfile = false;
         string keyfilePath = "";
+        string zipFilePath = "";
+        bool encryptFolderMode = false;
+        string folderSelected = "";
 
         public MainWindow()
         {
@@ -101,11 +105,48 @@ namespace sep_micro
             {
                 pwSecretKey.IsEnabled = false;
                 string password = pwSecretKey.Password;
+                folderSelected = selectedFilePaths[0];
                 if (usingKeyfile)
                 {
                     password += OtherOperations.CalculateSHA256(keyfilePath);
                 }
-                if (encryptMode)
+                
+                if(encryptFolderMode==true)
+                {
+                    selectedFilePaths = Directory.GetFiles(selectedFilePaths[0]);
+                    selectedFileNames = new string[Directory.GetFiles(folderSelected).Length];
+                }
+
+                if(encryptMode && cbCombineFiles.IsChecked==true)
+                {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.FileName = "Multiple Files.zip";
+                    saveFileDialog.Filter = "All files (*.*)|*.*";
+                    saveFileDialog.RestoreDirectory = true;
+
+                    bool? result = saveFileDialog.ShowDialog();
+                    if (result == true)
+                    {
+                        zipFilePath = saveFileDialog.FileName;
+                        try
+                        {
+                            using (var archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
+                            {
+                                foreach (string filePath in selectedFilePaths)
+                                {
+                                    string fileName = Path.GetFileName(filePath);
+                                    archive.CreateEntryFromFile(filePath, fileName);
+                                }
+                            }
+                            AES.EncryptFile(zipFilePath, zipFilePath + ".aes", password);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"An error occurred while saving the file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+                else if (encryptMode)
                 {
                     foreach (string file in selectedFilePaths)
                     {
@@ -121,37 +162,56 @@ namespace sep_micro
                     }
                     MessageBox.Show($"{selectedFilePaths.Length} files decrypted.", "SEP");
                 }
+
                 if (cbDeleteFiles.IsChecked == true)
                 {
                     foreach (string file in selectedFilePaths)
                     {
                         OtherOperations.WipeFile(file, 3);
                     }
+                    if(encryptFolderMode==true)
+                    {
+                        Directory.Delete(folderSelected);
+                    }
                 }
-                pwSecretKey.IsEnabled = true;
-                pwSecretKey.Password = "";
-                lbFileDisplayPreview.Content = "Drag and drop files here";
-                selectedFileNames = null;
-                selectedFilePaths = null;
-                usingKeyfile = false;
-                lbKeyfile.Content = "No keyfile selected.";
-                keyfilePath = "";
+                if (cbCombineFiles.IsChecked == true)
+                {
+                    OtherOperations.WipeFile(zipFilePath, 3);
+                }
+
+                ClearOptions();
             }
+        }
+
+        private void ClearOptions()
+        {
+            pwSecretKey.IsEnabled = true;
+            pwSecretKey.Password = "";
+            lbFileDisplayPreview.Content = "Drag and drop files here";
+            selectedFileNames = null;
+            selectedFilePaths = null;
+            usingKeyfile = false;
+            lbKeyfile.Content = "No keyfile selected.";
+            keyfilePath = "";
+            cbRecursiveEncryption.IsChecked = false;
+            cbRecursiveEncryption.Visibility = Visibility.Hidden;
+            encryptFolderMode = false;
+            btnFunction.Content = "Ready";
+            cbCombineFiles.IsChecked = false;
+            encryptMode = true;
+            usingKeyfile = false;
         }
 
         private void btnClearFiles_Click(object sender, RoutedEventArgs e)
         {
-            selectedFileNames = null;
-            selectedFilePaths = null;
-            lbFileDisplayPreview.Content = "Drag and drop files here";
-            btnFunction.Content = "Ready";
+            ClearOptions();
         }
 
         private void ConditionChecker()
         {
             try
             {
-                if (selectedFilePaths.Length > 1)
+                if (selectedFilePaths.Length > 1 || encryptFolderMode==true)
                 {
                     cbCombineFiles.IsEnabled = true;
                 }
@@ -161,10 +221,15 @@ namespace sep_micro
                     cbCombineFiles.IsEnabled = false;
                 }
             }
-            catch (Exception ex)
-            {
+            catch { }
+            //try
+            //{
+            //    if ()
+            //    {
 
-            }
+            //    }
+            //}
+            //catch { }
         }
 
         private void btnShowPassword_Click(object sender, RoutedEventArgs e)
@@ -218,27 +283,44 @@ namespace sep_micro
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 selectedFilePaths = (string[])e.Data.GetData(DataFormats.FileDrop);
+                
                 //Get safe file names
                 selectedFileNames = new string[selectedFilePaths.Length];
+
                 for (int i = 0; i < selectedFilePaths.Length; i++)
                 {
                     selectedFileNames[i] = System.IO.Path.GetFileName(selectedFilePaths[i]);
                 }
-                if (selectedFilePaths.Length == 0)
+
+                //If the selectedFilePaths is a folder, then check and disable cbCombineFiles
+                if(Directory.Exists(selectedFilePaths[0]) && selectedFilePaths.Length>1)
                 {
-                    MessageBox.Show("Drag and drop files here");
+                    MessageBox.Show("You cannot enter multiple folders or a folder with files.\r\n\r\nPlease either enter 1 folder, or multiple files with no folders.");
+                    lbFileDisplayPreview.Content = "Drag and drop files here";
+                }
+                else if (selectedFilePaths.Length == 0)
+                {
+                    lbFileDisplayPreview.Content = "Drag and drop files here";
+                }
+                else if (Directory.Exists(selectedFilePaths[0]))
+                {
+                    lbFileDisplayPreview.Content = $"{selectedFilePaths[0]}";
+                    cbCombineFiles.IsChecked = true;
+                    cbRecursiveEncryption.Visibility = Visibility.Visible;
+                    encryptFolderMode = true;
+                    FileHandler();
                 }
                 else if (selectedFilePaths.Length == 1)
                 {
                     lbFileDisplayPreview.Content = selectedFileNames[0];
+                    FileHandler();
                 }
                 else
                 {
                     lbFileDisplayPreview.Content = selectedFilePaths.Length.ToString() + " files selected";
+                    FileHandler();
                 }
             }
-
-            FileHandler();
         }
 
         private void cbCombineFiles_Checked(object sender, RoutedEventArgs e)
@@ -269,7 +351,7 @@ namespace sep_micro
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.FileName = "Keyfile";
-            saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog.Filter = "All files (*.*)|*.*";
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.RestoreDirectory = true;
 
@@ -323,6 +405,19 @@ namespace sep_micro
             if (openFileDialog.ShowDialog() == true)
             {
                 SelectKeyfile(openFileDialog.FileName);
+            }
+        }
+
+        private void cbRecursiveEncryption_Unchecked(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void cbCombineFiles_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (encryptFolderMode == true)
+            {
+                cbCombineFiles.IsChecked = true;
             }
         }
     }
